@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# uv
+.python-version
+
+# Data (large files, don't commit)
+data/raw/*.parquet
+data/processed/*.parquet
+data/splits/*.parquet
+data/raw/*.csv
+data/processed/*.csv
+data/splits/*.csv
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# MLflow
+mlruns/
+mlflow/artifacts/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.log
+
+# Terraform
+infrastructure/terraform/.terraform/
+infrastructure/terraform/*.tfstate*
+
+# Docker
+*.tar
