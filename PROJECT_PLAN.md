@@ -387,6 +387,7 @@ The same features kept as a (user, 4, num_features) 3D tensor — one vector per
 | ML Training | XGBoost, PyTorch, scikit-learn, Optuna |
 | Explainability | SHAP |
 | Experiment Tracking | MLflow |
+| Dev Environment | Docker Compose (Spark 3.5.6 cluster + PostgreSQL + pgAdmin), VS Code Dev Containers |
 | Containerization | Docker |
 | Model Serving | AWS SageMaker Endpoint or Lambda + API Gateway |
 | Batch Inference | SageMaker Batch Transform or Step Functions |
@@ -423,8 +424,9 @@ gfn-churn-prediction/
 ├── PROJECT_PLAN.md              # This document
 ├── .gitignore
 ├── pyproject.toml               # Project dependencies (or requirements.txt)
-├── Dockerfile
 ├── Makefile                     # Common commands
+├── .devcontainer/
+│   └── devcontainer.json        # VS Code Dev Container config
 ├── data/
 │   ├── raw/                     # Generated synthetic data (parquet)
 │   ├── processed/               # Feature-engineered data
@@ -441,7 +443,10 @@ gfn-churn-prediction/
 ├── tests/                       # Unit and integration tests
 ├── infrastructure/
 │   ├── terraform/               # AWS infrastructure as code
-│   └── docker/                  # Dockerfiles for different stages
+│   └── docker/                  # Dev environment (Spark cluster + DB)
+│       ├── Dockerfile           # Spark dev container image
+│       ├── docker-compose.yml   # Full stack: Spark master/workers + PostgreSQL + pgAdmin
+│       └── requirements.txt     # Python deps for container
 ├── .github/
 │   └── workflows/               # GitHub Actions CI/CD pipelines
 └── mlflow/                      # MLflow tracking configs
@@ -524,6 +529,15 @@ Format: `<type>(<scope>): <short description>`
   - [x] `run_all.py` — unified entry point, supports SCALE and SEED env vars
   - [ ] Data validation & EDA notebook (optional, can do in Phase 2)
 - [ ] Phase 2: Feature engineering (PySpark)
+  - [x] Dev environment setup: Docker Compose Spark cluster integrated into project (.devcontainer + infrastructure/docker)
+  - [ ] Session pattern features (weekly_session_count, avg_session_duration, total_playtime, session_regularity, peak_hour_ratio, weekend_ratio)
+  - [ ] Streaming quality features (avg_latency, avg_fps, frame_drop_rate, disconnect_rate, avg_bitrate, avg_jitter, packet_loss_avg, crash_exit_ratio)
+  - [ ] Game diversity features (unique_games_played, genre_entropy, new_game_trial_rate, top_game_concentration)
+  - [ ] Playtime volatility features (daily_playtime_std, daily_playtime_cv, session_duration_std)
+  - [ ] Engagement decay features (session_count_wow_change, playtime_wow_change, longest_inactive_days)
+  - [ ] Payment & subscription features (aggregated over 4-week window)
+  - [ ] Combine all features → XGBoost format (flat) + LSTM format (sequential)
+  - [ ] Extract finalized code into src/feature_engineering/*.py modules
 - [ ] Phase 3: Dataset construction
 - [ ] Phase 4: Model training
 - [ ] Phase 5: Experiment tracking
@@ -539,8 +553,8 @@ Format: `<type>(<scope>): <short description>`
 | subscription_events | 38,763 | 0.5 MB |
 | payments | 238,948 | 2.3 MB |
 
-**Current branch**: `develop` (Phase 1 merged)
-**Next Step**: Phase 2 — Feature engineering with PySpark.
+**Current branch**: `feature/phase2-feature-engineering` (from `develop`)
+**Next Step**: Phase 2 — Implement session pattern features in PySpark notebook.
 
 ---
 
@@ -560,7 +574,10 @@ Format: `<type>(<scope>): <short description>`
 | 2025-03-12 | Added hot event weeks mechanism | Simulates new game launches causing activity spikes; adds non-stationarity to time series |
 | 2025-03-12 | Added noise injection layer (AFK, latency spikes, late night) | Prevents overly clean synthetic data; real data has unexplainable outliers |
 | 2025-03-12 | Python environment managed with uv | User preference |
+| 2025-03-13 | Integrated Docker Spark cluster into project repo (.devcontainer + infrastructure/docker) | Self-contained dev environment: clone → open in Dev Container → ready. Spark 3.5.6 + Java 17 + 2 workers. PostgreSQL/pgAdmin included for potential Phase 5-6 use |
+| 2025-03-13 | Feature engineering developed in notebook first, then extracted to .py modules | Notebook for interactive exploration and validation; .py modules for reproducible pipeline |
+| 2025-03-13 | Feature design decisions: wow_change week1=null, rolling_slope at aggregation layer, frame_drop_rate simplified to AVG(drops), quality_downgrade_count deferred, new_game_trial_rate week1=null, 0-session days included in daily stats, payment features aggregated over 4 weeks only | Balances completeness with implementation complexity; defers uncertain features |
 
 ---
 
-*Last updated: 2025-03-12*
+*Last updated: 2025-03-13*
