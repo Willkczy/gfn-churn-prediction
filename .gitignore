@@ -42,3 +42,8 @@ infrastructure/terraform/*.tfstate*
 
 # Docker
 *.tar
+
+# Docker volumes
+spark_cluster_data/
+pg_db_data/
+pgadmin_data/
