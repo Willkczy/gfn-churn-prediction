@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import datetime
 
 # --- Scale config ---
 SCALE = {
@@ -47,6 +48,46 @@ AGE_WEIGHTS = [0.30, 0.35, 0.20, 0.15]
 GENDERS = ["M", "F", "other", "undisclosed"]
 GENDER_WEIGHTS = [0.55, 0.30, 0.05, 0.10]
 
+# Monthly signup weights (index 0 = Jan, 11 = Dec)
+# Peaks: summer (Jul-Aug), winter break (Jan-Feb), year-end holidays (Dec)
+MONTH_WEIGHTS = [
+    1.3,  # Jan - winter break
+    1.2,  # Feb - winter break / Lunar New Year
+    0.8,  # Mar
+    0.8,  # Apr
+    0.9,  # May
+    1.0,  # Jun - summer starts
+    1.4,  # Jul - summer peak
+    1.4,  # Aug - summer peak
+    1.0,  # Sep - school starts
+    0.8,  # Oct
+    0.9,  # Nov
+    1.2,  # Dec - holiday season
+]
+
+def _generate_signup_dates(num_users: int, rng: np.random.Generator) -> list:
+    """Generate signup dates with seasonal bias."""
+    import calendar
+
+    year = 2023
+    # Build per-day weights: each day inherits its month's weight
+    daily_weights = []
+    all_dates = []
+    for month_idx, weight in enumerate(MONTH_WEIGHTS):
+        month = month_idx + 1
+        days_in_month = calendar.monthrange(year, month)[1]
+        for day in range(1, days_in_month + 1):
+            all_dates.append(datetime.date(year, month, day))
+            daily_weights.append(weight)
+
+    # Normalize to probabilities
+    daily_weights = np.array(daily_weights)
+    daily_probs = daily_weights / daily_weights.sum()
+
+    # Sample
+    indices = rng.choice(len(all_dates), size=num_users, p=daily_probs)
+    return [all_dates[i] for i in indices]
+
 
 def generate_users(scale: str = "small", seed: int = 42) -> pd.DataFrame:
     num_users = SCALE[scale]
@@ -59,8 +100,7 @@ def generate_users(scale: str = "small", seed: int = 42) -> pd.DataFrame:
 
     # Signup date: spread over 2023-01-01 ~ 2023-12-31
     signup_start = pd.Timestamp("2023-01-01")
-    signup_days = rng.integers(0, 365, size=num_users)
-    signup_dates = [signup_start + pd.Timedelta(days=int(d)) for d in signup_days]
+    signup_dates = _generate_signup_dates(num_users, rng)
 
     # Subscription tier: depends on persona
     tiers = []
