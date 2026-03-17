@@ -6,6 +6,8 @@ services:
     container_name: spark-dev-node
     networks:
       - app-network
+    ports:
+      - "4040:4040"
     volumes:
       - ../../:/home/spark/work 
       - spark_cluster_data:/data
