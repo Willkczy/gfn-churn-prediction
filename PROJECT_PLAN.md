@@ -146,10 +146,18 @@ To produce realistic churn patterns, users are generated under 4 behavioral pers
 | **About-to-churn** | 15% | Starts like Regular/Casual, then shows decay: declining session frequency, rising latency tolerance, shorter durations, more disconnects in final 1-2 weeks |
 
 ### 3.3 Temporal Design
-- **Data window**: 12 weeks total
-- **Observation period**: Week 1–4 (features extracted from here)
-- **Prediction window**: Week 5–6 (if zero sessions → churn = 1)
-- **Buffer / future data**: Week 7–12 (for model retraining simulation)
+- **Data window**: 12 weeks total (2024-01-01 ~ 2024-03-25)
+- **Observation period**: Week 5–8 (features extracted from here)
+- **Prediction window**: Week 9–10 (if zero sessions → churn = 1)
+- **Buffer / future data**: Week 11–12 (for model retraining simulation)
+- **Historical baseline**: Week 1–4 (available for trend comparison, e.g., engagement decay vs prior period)
+
+**Rationale for window placement**: The about_to_churn persona's decay logic starts at week 8
+(decay_factor drops from 1.0 to 0.75). By placing the observation window at week 5–8, the model
+can observe the transition from normal behavior to early decay signals. The prediction window at
+week 9–10 aligns with significant decay (factor 0.50–0.25), making zero-session churn labels
+meaningful. Week 1–4 is retained as a historical baseline for computing trend features like
+engagement decay relative to a prior period.
 
 ### 3.4 Churn Signal Patterns (for about-to-churn users)
 - Session count drops 40-70% week-over-week in final 2 weeks
@@ -309,10 +317,16 @@ Features are computed at **weekly granularity** for the 4-week observation windo
 - `weekend_ratio` — % of sessions on weekends
 
 ### 4.2 Engagement Decay
-- `session_count_wow_change` — week-over-week session count change rate
-- `playtime_wow_change` — week-over-week playtime change rate
+- `session_count_wow_change` — week-over-week session count change rate (within obs window)
+- `playtime_wow_change` — week-over-week playtime change rate (within obs window)
 - `rolling_avg_playtime_slope` — slope of 4-week rolling average playtime
-- `longest_inactive_days` — max consecutive days with no session
+- `longest_inactive_days` — max consecutive days with no session (within obs window)
+- `session_count_vs_baseline` — obs window avg session count / baseline (week 1–4) avg session count
+- `playtime_vs_baseline` — obs window avg playtime / baseline avg playtime
+
+**Note**: Week 1–4 serves as a historical baseline for trend features. This allows the model to
+detect users whose behavior is declining relative to their own prior activity, not just relative
+to other users.
 
 ### 4.3 Streaming Quality
 - `avg_latency` — mean latency across sessions
@@ -577,7 +591,7 @@ Format: `<type>(<scope>): <short description>`
 | 2025-03-13 | Integrated Docker Spark cluster into project repo (.devcontainer + infrastructure/docker) | Self-contained dev environment: clone → open in Dev Container → ready. Spark 3.5.6 + Java 17 + 2 workers. PostgreSQL/pgAdmin included for potential Phase 5-6 use |
 | 2025-03-13 | Feature engineering developed in notebook first, then extracted to .py modules | Notebook for interactive exploration and validation; .py modules for reproducible pipeline |
 | 2025-03-13 | Feature design decisions: wow_change week1=null, rolling_slope at aggregation layer, frame_drop_rate simplified to AVG(drops), quality_downgrade_count deferred, new_game_trial_rate week1=null, 0-session days included in daily stats, payment features aggregated over 4 weeks only | Balances completeness with implementation complexity; defers uncertain features |
-
+| 2025-03-19 | Shifted observation window to week 5–8, prediction to week 9–10 | Original week 1–4 obs window preceded the churn decay onset (week 8), making churn labels ineffective. New placement captures early decay signals in obs and meaningful churn in prediction window. Week 1–4 retained as historical baseline for trend features. |
 ---
 
 *Last updated: 2025-03-13*
