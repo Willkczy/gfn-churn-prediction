@@ -12,12 +12,12 @@
 - [x] `weekend_ratio` — % of sessions on weekends
 
 ## 2. Engagement Decay
-- [ ] `session_count_wow_change` — week-over-week session count change rate (week 1 = null)
-- [ ] `playtime_wow_change` — week-over-week playtime change rate (week 1 = null)
-- [ ] `rolling_avg_playtime_slope` — slope of 4-week rolling average playtime (computed at aggregation)
-- [ ] `longest_inactive_days` — max consecutive days with no session (within obs window)
-- [ ] `session_count_vs_baseline` — obs window avg session count / baseline (week 1–4) avg
-- [ ] `playtime_vs_baseline` — obs window avg playtime / baseline avg playtime
+- [x] `session_count_wow_change` — week-over-week session count change rate (week 1 = null)
+- [x] `playtime_wow_change` — week-over-week playtime change rate (week 1 = null)
+- [x] `rolling_avg_playtime_slope` — slope of 4-week rolling average playtime (computed at aggregation)
+- [x] `longest_inactive_days` — max consecutive days with no session (within obs window)
+- [x] `session_count_vs_baseline` — obs window avg session count / baseline (week 1–4) avg
+- [x] `playtime_vs_baseline` — obs window avg playtime / baseline avg playtime
 
 **Note**: Week 1–4 is a historical baseline for trend features — detecting decline relative to the user's own prior activity, not just cross-user comparison.
 
