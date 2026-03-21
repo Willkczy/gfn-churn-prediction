@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 # --- Temporal config ---
 OBS_START = pd.Timestamp("2024-01-01")
@@ -149,10 +151,10 @@ def _generate_user_sessions(
         week_start = OBS_START + pd.Timedelta(weeks=week)
 
         # --- Decay logic for about_to_churn users ---
-        if persona == "about_to_churn" and week >= 8:
-            decay_factor = 1.0 - 0.25 * (week - 7)
+        if persona == "about_to_churn" and week >= 6:
+            decay_factor = 1.0 - 0.25 * (week - 5)
             decay_factor = max(decay_factor, 0.0)
-            duration_multiplier = 0.7 - 0.15 * (week - 8)
+            duration_multiplier = 0.7 - 0.15 * (week - 6)
             duration_multiplier = max(duration_multiplier, 0.3)
             use_degraded_exit = True
         else:
@@ -326,8 +328,13 @@ if __name__ == "__main__":
 
     df = generate_session_logs(users_df, game_catalog_df)
 
+    table = pa.Table.from_pandas(df, preserve_index=False)
+    for col_name in ["start_time", "end_time"]:
+        idx = table.schema.get_field_index(col_name)
+        table = table.set_column(idx, col_name, table.column(idx).cast(pa.timestamp("us")))
+
     output_path = os.path.join(output_dir, "session_logs.parquet")
-    df.to_parquet(output_path, index=False)
+    pq.write_table(table, output_path)
 
     print(f"\nGenerated {len(df):,} sessions → {output_path}")
     print(f"File size: {os.path.getsize(output_path) / 1024 / 1024:.1f} MB")

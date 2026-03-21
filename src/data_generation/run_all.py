@@ -1,6 +1,8 @@
 import os
 import time
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from src.data_generation.generate_game_catalog import generate_game_catalog
 from src.data_generation.generate_users import generate_users
@@ -36,7 +38,11 @@ def main():
     print("[3/5] Generating session logs (this may take a few minutes)...")
     t = time.time()
     session_logs_df = generate_session_logs(users_df, game_catalog_df, seed=seed)
-    session_logs_df.to_parquet(os.path.join(output_dir, "session_logs.parquet"), index=False)
+    table = pa.Table.from_pandas(session_logs_df, preserve_index=False)
+    for col_name in ["start_time", "end_time"]:
+        i = table.schema.get_field_index(col_name)
+        table = table.set_column(i, col_name, table.column(i).cast(pa.timestamp("us"), safe=False))
+    pq.write_table(table, os.path.join(output_dir, "session_logs.parquet"))
     print(f"  → {len(session_logs_df):,} sessions ({time.time() - t:.1f}s)\n")
 
     # 4. Subscription events
