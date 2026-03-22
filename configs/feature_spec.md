@@ -22,14 +22,14 @@
 **Note**: Week 1–4 is a historical baseline for trend features — detecting decline relative to the user's own prior activity, not just cross-user comparison.
 
 ## 3. Streaming Quality
-- [ ] `avg_latency` — mean latency across sessions
-- [ ] `avg_fps` — mean frame rate
-- [ ] `frame_drop_rate` — AVG(total_frame_drops) per session (simplified)
-- [ ] `disconnect_rate` — disconnects per session
-- [ ] `avg_bitrate` — mean bitrate
-- [ ] `avg_jitter` — mean jitter
-- [ ] `packet_loss_avg` — mean packet loss rate
-- [ ] `crash_exit_ratio` — % of sessions ending in crash/disconnect/timeout
+- [x] `avg_latency` — mean latency across sessions
+- [x] `avg_fps` — mean frame rate
+- [x] `frame_drop_rate` — AVG(total_frame_drops) per session (simplified)
+- [x] `disconnect_rate` — disconnects per session
+- [x] `avg_bitrate` — mean bitrate
+- [x] `avg_jitter` — mean jitter
+- [x] `packet_loss_avg` — mean packet loss rate
+- [x] `crash_exit_ratio` — % of sessions ending in crash/disconnect/timeout
 - [ ] `quality_downgrade_count` — deferred (needs user-level "usual resolution" definition)
 
 ## 4. Game Diversity
