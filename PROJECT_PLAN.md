@@ -59,12 +59,12 @@
   - [ ] Data validation & EDA notebook (optional, can do in Phase 2)
 - [ ] Phase 2: Feature engineering (PySpark)
   - [x] Dev environment setup: Docker Compose Spark cluster integrated into project (.devcontainer + infrastructure/docker)
-  - [ ] Session pattern features (weekly_session_count, avg_session_duration, total_playtime, session_regularity, peak_hour_ratio, weekend_ratio)
-  - [ ] Streaming quality features (avg_latency, avg_fps, frame_drop_rate, disconnect_rate, avg_bitrate, avg_jitter, packet_loss_avg, crash_exit_ratio)
+  - [x] Session pattern features (weekly_session_count, avg_session_duration, total_playtime, session_regularity, peak_hour_ratio, weekend_ratio)
+  - [x] Engagement decay features (session_count_wow_change, playtime_wow_change, longest_inactive_days, baseline ratios, rolling slope)
+  - [x] Streaming quality features (avg_latency, avg_fps, frame_drop_rate, disconnect_rate, avg_bitrate, avg_jitter, packet_loss_avg, crash_exit_ratio)
   - [ ] Game diversity features (unique_games_played, genre_entropy, new_game_trial_rate, top_game_concentration)
   - [ ] Playtime volatility features (daily_playtime_std, daily_playtime_cv, session_duration_std)
-  - [ ] Engagement decay features (session_count_wow_change, playtime_wow_change, longest_inactive_days)
-  - [ ] Payment & subscription features (aggregated over 4-week window)
+  - [ ] Payment & subscription features (aggregated over 4-week)
   - [ ] Combine all features → XGBoost format (flat) + LSTM format (sequential)
   - [ ] Extract finalized code into src/feature_engineering/*.py modules
 - [ ] Phase 3: Dataset construction
@@ -83,7 +83,7 @@
 | payments | 238,948 | 2.3 MB |
 
 **Current branch**: `feature/phase2-feature-engineering` (from `develop`)
-**Next Step**: Phase 2 — Implement session pattern features in PySpark notebook.
+**Next Step**: Phase 2 — Implement remaining feature sections (Game Diversity, Playtime Volatility, Subscription & Payment).
 
 ---
 
@@ -111,4 +111,4 @@
 
 ---
 
-*Last updated: 2025-03-19*
+*Last updated: 2025-03-22*

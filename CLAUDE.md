@@ -19,7 +19,8 @@ GFN Churn Prediction — end-to-end ML pipeline predicting user churn on a cloud
 - `PROJECT_PLAN.md` — phases, progress checklist, architecture decisions
 - `configs/data_design.md` — **how data was generated**: personas, decay mechanics, causal relationships, noise. Read before modeling.
 - `configs/feature_spec.md` — feature definitions with checkboxes (Phase 2 working reference)
-- `notebooks/phase2_feature_engineering.ipynb` — active development notebook
+- `notebooks/phase2_feature_engineering.ipynb` — active development notebook (PySpark)
+- `notebooks/phase2_feature_engineering_pandas.ipynb` — pandas equivalent for learning/reference
 - `src/data_generation/` — completed Phase 1 generators (50K users, 3.55M sessions)
 - `data/raw/` — generated parquet files (users, session_logs, game_catalog, subscription_events, payments)
 
