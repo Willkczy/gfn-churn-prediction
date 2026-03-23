@@ -14,7 +14,7 @@
 ## 2. Engagement Decay
 - [x] `session_count_wow_change` — week-over-week session count change rate (week 1 = null)
 - [x] `playtime_wow_change` — week-over-week playtime change rate (week 1 = null)
-- [x] `rolling_avg_playtime_slope` — slope of 4-week rolling average playtime (computed at aggregation)
+- [ ] `rolling_avg_playtime_slope` — slope of 4-week rolling average playtime (computed at aggregation)
 - [x] `longest_inactive_days` — max consecutive days with no session (within obs window)
 - [x] `session_count_vs_baseline` — obs window avg session count / baseline (week 1–4) avg
 - [x] `playtime_vs_baseline` — obs window avg playtime / baseline avg playtime
@@ -33,10 +33,10 @@
 - [ ] `quality_downgrade_count` — deferred (needs user-level "usual resolution" definition)
 
 ## 4. Game Diversity
-- [ ] `unique_games_played` — distinct games per week
-- [ ] `genre_entropy` — Shannon entropy of genre distribution
-- [ ] `new_game_trial_rate` — % of sessions on games not played before (week 1 = null)
-- [ ] `top_game_concentration` — % of playtime on most-played game
+- [x] `unique_games_played` — distinct games per week
+- [x] `genre_entropy` — Shannon entropy of genre distribution
+- [x] `new_game_trial_rate` — % of sessions on games not played before (week 1 = null)
+- [x] `top_game_concentration` — % of playtime on most-played game
 
 ## 5. Playtime Volatility
 - [ ] `daily_playtime_std` — std of daily playtime (0-session days included)
