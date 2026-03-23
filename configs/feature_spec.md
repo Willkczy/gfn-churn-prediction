@@ -39,21 +39,21 @@
 - [x] `top_game_concentration` — % of playtime on most-played game
 
 ## 5. Playtime Volatility
-- [ ] `daily_playtime_std` — std of daily playtime (0-session days included)
-- [ ] `daily_playtime_cv` — coefficient of variation
-- [ ] `session_duration_std` — std of individual session lengths
+- [x] `daily_playtime_std` — std of daily playtime (0-session days included)
+- [x] `daily_playtime_cv` — coefficient of variation
+- [x] `session_duration_std` — std of individual session lengths
 
 ## 6. Subscription & Payment
-- [ ] `current_tier_numeric` — free=0, priority=1, ultimate=2
-- [ ] `days_since_signup` — account age
-- [ ] `tier_changes_count` — total subscription changes
-- [ ] `has_downgraded` — binary: ever downgraded
-- [ ] `total_spend_last_4w` — total payment amount in observation window
-- [ ] `payment_count_last_4w` — number of payments
-- [ ] `failed_payment_count` — number of failed transactions
-- [ ] `refund_count` — number of refunds
-- [ ] `days_since_last_payment` — recency of last successful payment
-- [ ] `payment_frequency_change` — payment count change vs prior period
+- [x] `current_tier_numeric` — free=0, priority=1, ultimate=2
+- [x] `days_since_signup` — account age
+- [x] `tier_changes_count` — total subscription changes
+- [x] `has_downgraded` — binary: ever downgraded
+- [x] `total_spend_last_4w` — total payment amount in observation window
+- [x] `payment_count_last_4w` — number of payments
+- [x] `failed_payment_count` — number of failed transactions
+- [x] `refund_count` — number of refunds
+- [x] `days_since_last_payment` — recency of last successful payment
+- [x] `payment_frequency_change` — payment count change vs prior period
 
 ## 7. Output Formats
 
