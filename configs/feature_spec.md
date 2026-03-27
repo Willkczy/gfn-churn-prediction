@@ -11,6 +11,12 @@
 - [x] `peak_hour_ratio` — % of sessions during peak hours (7pm-12am)
 - [x] `weekend_ratio` — % of sessions on weekends
 
+## 1.5 Population Normalization
+- [x] `weekly_session_count_norm` — session count / population median for that week
+- [x] `total_playtime_min_norm` — playtime / population median for that week
+
+> Removes hot-week effects (1.3-1.8x global activity spikes). Medians computed from active users only (before zero-fill). Trend features (wow_change, vs_baseline) are computed on normalized values.
+
 ## 2. Engagement Decay
 - [x] `session_count_wow_change` — week-over-week session count change rate (week 1 = null)
 - [x] `playtime_wow_change` — week-over-week playtime change rate (week 1 = null)
