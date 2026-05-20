@@ -69,6 +69,12 @@
   - [ ] Combine all features → XGBoost format (flat) + LSTM format (sequential)
   - [ ] Extract finalized code into src/feature_engineering/*.py modules
 - [ ] Phase 3: Dataset construction
+  - [x] Churn labels (zero sessions in pred window → churn=1)
+  - [x] XGBoost flat aggregation (50K × 43 cols)
+  - [x] LSTM 3D tensor (50K × 4 × 38)
+  - [x] Stratified train/val/test split (70/15/15, seed=42)
+  - [ ] Phase 3 validation notebook (label sanity, NaN audit, leakage check)
+  - [ ] Extract notebook to src/dataset/*.py modules
 - [ ] Phase 4: Model training
 - [ ] Phase 5: Experiment tracking
 - [ ] Phase 6: AWS deployment
