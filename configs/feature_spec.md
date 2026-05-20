@@ -78,8 +78,13 @@ NaN handling: left as-is (XGBoost handles NaN natively for `days_since_last_paym
 NaN fill strategy: `wow_change`/`new_game_trial_rate` → 0, `vs_baseline` → 1.0, `days_since_last_payment` → -1, remaining → 0.
 
 ### Output files
-- `data/processed/xgboost_features.parquet` — flat, 50K rows
-- `data/processed/lstm_features.npz` — arrays: `X`, `y`, `user_ids`, `feature_names`
+Stratified by `churn` label, seed=42, 70/15/15 split. Same `user_id` partition
+across both formats (a user in xgboost_train is also in lstm_train).
+
+- `data/processed/xgboost_{train,val,test}.parquet` — flat, 35K / 7.5K / 7.5K rows
+- `data/processed/lstm_{train,val,test}.npz` — arrays: `X`, `y`, `user_ids`, `feature_names`
+
+Churn rate is ~12.2% in each split (stratification preserved).
 
 ## Design Decisions
 - `wow_change` features: week 1 = null (no prior week to compare)
