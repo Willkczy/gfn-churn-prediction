@@ -20,7 +20,7 @@
 ## 2. Engagement Decay
 - [x] `session_count_wow_change` — week-over-week session count change rate (week 1 = null)
 - [x] `playtime_wow_change` — week-over-week playtime change rate (week 1 = null)
-- [ ] `rolling_avg_playtime_slope` — slope of 4-week rolling average playtime (computed at aggregation)
+- [x] `rolling_avg_playtime_slope` — slope of 4-week rolling average playtime (computed at aggregation)
 - [x] `longest_inactive_days` — max consecutive days with no session (within obs window)
 - [x] `session_count_vs_baseline` — obs window avg session count / baseline (week 1–4) avg
 - [x] `playtime_vs_baseline` — obs window avg playtime / baseline avg playtime
@@ -64,10 +64,22 @@
 ## 7. Output Formats
 
 ### XGBoost (aggregated)
-All above features averaged/aggregated across the 4-week window → single row per user.
+Single row per user. Aggregation strategy by feature type:
+- **Mean** (22 cols): behavioral features averaged across 4 weeks
+- **Last-week** (9 cols): recency-sensitive features from week 4 only (wow_change, vs_baseline, longest_inactive, new_game_trial + extra last for session_count, playtime, crash_exit)
+- **Static** (10 cols): user-level features (tier, spend, payment counts) — same all 4 weeks
+- **Slope** (1 col): `playtime_slope` — linear slope of total_playtime across weeks 1-4
+
+NaN handling: left as-is (XGBoost handles NaN natively for `days_since_last_payment`, `payment_frequency_change`, baseline ratios).
 
 ### LSTM (sequential)
-Same features kept as `(user, 4, num_features)` 3D tensor — one vector per week, 4 weeks.
+`(users, 4, num_features)` 3D tensor — one vector per week, 4 weeks.
+
+NaN fill strategy: `wow_change`/`new_game_trial_rate` → 0, `vs_baseline` → 1.0, `days_since_last_payment` → -1, remaining → 0.
+
+### Output files
+- `data/processed/xgboost_features.parquet` — flat, 50K rows
+- `data/processed/lstm_features.npz` — arrays: `X`, `y`, `user_ids`, `feature_names`
 
 ## Design Decisions
 - `wow_change` features: week 1 = null (no prior week to compare)
