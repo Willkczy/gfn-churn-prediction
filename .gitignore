@@ -16,6 +16,10 @@ data/splits/*.parquet
 data/raw/*.csv
 data/processed/*.csv
 data/splits/*.csv
+data/processed/*.npz
+
+# Trained models (large binaries, regenerable)
+models/
 
 # Notebooks checkpoints
 .ipynb_checkpoints/
@@ -27,6 +31,7 @@ mlflow/artifacts/
 # IDE
 .vscode/
 .idea/
+.claude/
 
 # OS
 .DS_Store
