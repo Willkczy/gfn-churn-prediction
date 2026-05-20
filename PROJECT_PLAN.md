@@ -15,9 +15,10 @@
 - SHAP-based feature importance for retention insights
 - Full MLOps: CI/CD, monitoring, drift detection, auto-retraining
 
-**Temporal Design**:
+**Temporal Design** (week numbers are 1-indexed calendar weeks — see [configs/temporal_conventions.md](configs/temporal_conventions.md)):
 - 12-week window: 2024-01-01 ~ 2024-03-25
 - Week 1–4: historical baseline | Week 5–8: observation (features) | Week 9–10: prediction (churn label) | Week 11–12: buffer
+- About_to_churn decay: factor 1.00 → 0.75 → 0.50 → 0.25 across weeks 5–8, hits 0.00 at week 9
 
 ---
 
@@ -46,7 +47,7 @@
   - [x] `generate_users.py` — 50K users (small), 4 personas, persona-based tier assignment, Taiwan counties as regions
   - [x] `generate_session_logs.py` — 3.55M sessions (98.5 MB) with:
     - Persona-based behavior profiles (session frequency, duration, quality)
-    - Churn decay logic (weeks 8-11 progressive decline)
+    - Churn decay logic (about_to_churn: weeks 6–9 progressive decline; calendar-week-indexed — see configs/temporal_conventions.md)
     - Dynamic causal: poor quality → session cut short + forced exit type
     - Dynamic causal: bad experience → 35% chance to skip next session
     - Hot event weeks: 2-3 random weeks with 1.3-1.8x activity boost
@@ -108,6 +109,7 @@
 | 2025-03-13 | Feature design decisions: wow_change week1=null, rolling_slope at aggregation layer, frame_drop_rate simplified to AVG(drops), quality_downgrade_count deferred, new_game_trial_rate week1=null, 0-session days included in daily stats, payment features aggregated over 4 weeks only | Balances completeness with implementation complexity; defers uncertain features |
 | 2025-03-19 | Shifted observation window to week 5–8, prediction to week 9–10 | Original week 1–4 obs window preceded the churn decay onset (week 8), making churn labels ineffective. New placement captures early decay signals in obs and meaningful churn in prediction window. Week 1–4 retained as historical baseline for trend features. |
 | 2025-03-19 | Split PROJECT_PLAN into lean plan + CLAUDE.md + configs/feature_spec.md | Original 596-line plan was too large. Data schemas/generation logic now live in code. Feature spec is a working checklist in configs/. CLAUDE.md provides AI-agent context. |
+| 2026-05-20 | Fixed off-by-one in `generate_session_logs.py` decay logic; introduced explicit `calendar_week = week + 1`; created `configs/temporal_conventions.md` as the canonical timeline doc | Loop counter `week` was 0-indexed but the formula was written assuming 1-indexed, so decay-zero landed on calendar week 10 instead of the intended week 9. Result: Phase 3 churn rate was 3.5% instead of the expected ~15%. Fix: branch on `calendar_week`. All docs now consistently use 1-indexed calendar weeks. Requires Phase 1 data regen + Phase 2 rerun. |
 
 ---
 

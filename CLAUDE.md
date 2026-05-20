@@ -9,10 +9,10 @@ GFN Churn Prediction — end-to-end ML pipeline predicting user churn on a cloud
 - Working in `notebooks/phase2_feature_engineering.ipynb` first, then extracting to `src/feature_engineering/`
 
 ## Temporal Design
-- 12-week data window: 2024-01-01 ~ 2024-03-25
+- 12-week data window: 2024-01-01 ~ 2024-03-25 (week numbers everywhere are **1-indexed calendar weeks** — see [configs/temporal_conventions.md](configs/temporal_conventions.md) for the canonical timeline)
 - Week 1–4: historical baseline (for trend comparison)
-- Week 5–8: observation window (features extracted here)
-- Week 9–10: prediction window (zero sessions → churn = 1)
+- Week 5–8: observation window (features extracted here; about_to_churn decay factor 1.00 → 0.25)
+- Week 9–10: prediction window (zero sessions → churn = 1; about_to_churn decay factor 0.00)
 - Week 11–12: buffer for retraining simulation
 
 ## Key Files
@@ -41,4 +41,4 @@ GFN Churn Prediction — end-to-end ML pipeline predicting user churn on a cloud
 ## Important Notes
 - `persona` column in users must be EXCLUDED from model features (data leakage)
 - Free tier sessions capped at 60 min in generated data
-- Churn decay for about_to_churn users starts at gen week 6 (0-indexed)
+- Churn decay for about_to_churn users starts at calendar week 6 (1-indexed), reaches zero at week 9 — see `configs/temporal_conventions.md`

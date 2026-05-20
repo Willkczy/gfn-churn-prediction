@@ -22,17 +22,19 @@
 
 > `persona` column exists in users table but must be **excluded from model features** — it's data leakage.
 
-## Churn Decay Mechanism (about_to_churn users, weeks 8–11)
+## Churn Decay Mechanism (about_to_churn users, weeks 6–12)
 
-This is the core pattern the model should learn to detect:
+This is the core pattern the model should learn to detect. Week numbers below
+are **1-indexed calendar weeks** (see [temporal_conventions.md](temporal_conventions.md)).
 
-- `decay_factor` = 1.0 − 0.25 × (week − 5) → **0.75, 0.50, 0.25, 0.0** (0-indexed week 6–9)
-- `duration_multiplier` = 0.7 − 0.15 × (week − 6), min 0.3
+- `decay_factor` = max(0, 1.0 − 0.25 × (`calendar_week` − 5))
+  → week 6=0.75, 7=0.50, 8=0.25, 9–12=0.00
+- `duration_multiplier` = max(0.3, 0.7 − 0.15 × (`calendar_week` − 6))
 - Exit type shifts from [85% normal, 5% crash, 7% disconnect, 3% timeout] to **[50% normal, 18% crash, 22% disconnect, 10% timeout]**
 - Session count and duration progressively decline
 - Game diversity narrows
 
-**Implication for modeling**: The observation window (week 5–8) captures the **transition** from normal to early decay. Week 5–6 looks normal; week 7–8 shows progressive decay signals. The model needs to detect this shift, especially through week-over-week change features.
+**Implication for modeling**: The observation window (week 5–8) captures the **full transition** from normal to deep decay. Week 5 looks normal; weeks 6–8 show progressively stronger decline (factor 0.75 → 0.25). Weeks 9–10 (prediction window) hit zero, so virtually every about_to_churn user yields `churn = 1`. The model must learn the week 5→8 decline pattern in the obs window.
 
 ## Dynamic Causal Relationships
 

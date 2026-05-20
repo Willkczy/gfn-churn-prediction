@@ -122,10 +122,11 @@ def _inject_noise(sessions: list[dict], rng: np.random.Generator) -> list[dict]:
 def _generate_hot_weeks(rng: np.random.Generator) -> dict[int, float]:
     """
     Randomly select 2-3 weeks as 'hot event' weeks (new game launch, major update).
-    Returns {week_index: activity_multiplier}.
+    Returns {calendar_week (1-indexed): activity_multiplier}.
+    See configs/temporal_conventions.md for the week-numbering convention.
     """
     num_events = rng.integers(2, 4)
-    hot_weeks = rng.choice(range(OBS_WEEKS), size=num_events, replace=False)
+    hot_weeks = rng.choice(range(1, OBS_WEEKS + 1), size=num_events, replace=False)
     return {int(w): round(rng.uniform(1.3, 1.8), 2) for w in hot_weeks}
 
 
@@ -148,13 +149,25 @@ def _generate_user_sessions(
     had_bad_experience = False
 
     for week in range(OBS_WEEKS):
+        # `week` is 0-indexed (0..OBS_WEEKS-1).
+        # `calendar_week` is 1-indexed (1..12), matches the timeline used in
+        # docs, notebooks, and feature engineering. ALWAYS branch on
+        # calendar_week to avoid off-by-one bugs.
+        # See configs/temporal_conventions.md for the canonical timeline.
+        calendar_week = week + 1
         week_start = OBS_START + pd.Timedelta(weeks=week)
 
         # --- Decay logic for about_to_churn users ---
-        if persona == "about_to_churn" and week >= 6:
-            decay_factor = 1.0 - 0.25 * (week - 5)
+        # Decay starts at calendar week 6 (mid-obs-window) and reaches 0.0
+        # at calendar week 9 (start of prediction window), so users with
+        # this persona produce zero sessions during the pred window (9-10)
+        # and yield churn=1.
+        #   cal week 6 -> 0.75   cal week 7 -> 0.50
+        #   cal week 8 -> 0.25   cal week 9+ -> 0.00
+        if persona == "about_to_churn" and calendar_week >= 6:
+            decay_factor = 1.0 - 0.25 * (calendar_week - 5)
             decay_factor = max(decay_factor, 0.0)
-            duration_multiplier = 0.7 - 0.15 * (week - 6)
+            duration_multiplier = 0.7 - 0.15 * (calendar_week - 6)
             duration_multiplier = max(duration_multiplier, 0.3)
             use_degraded_exit = True
         else:
@@ -165,9 +178,9 @@ def _generate_user_sessions(
         # Number of sessions this week
         weekly_count = int(round(base_sessions_per_week * decay_factor))
 
-        # Hot event week: boost activity
-        if week in hot_weeks:
-            weekly_count = int(round(weekly_count * hot_weeks[week]))
+        # Hot event week: boost activity (keyed by 1-indexed calendar_week)
+        if calendar_week in hot_weeks:
+            weekly_count = int(round(weekly_count * hot_weeks[calendar_week]))
 
         weekly_count = max(0, int(rng.normal(weekly_count, 1)))
 
