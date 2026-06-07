@@ -19,7 +19,8 @@ data/splits/*.csv
 data/processed/*.npz
 
 # Trained models (large binaries, regenerable)
-models/
+# Anchored to repo root so it does NOT match src/models/ source code.
+/models/
 
 # Notebooks checkpoints
 .ipynb_checkpoints/
