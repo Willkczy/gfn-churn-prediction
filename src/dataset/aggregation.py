@@ -111,6 +111,11 @@ def reshape_lstm(
     n_users = len(user_ids)
     n_features = len(lstm_feature_cols)
 
+    if len(lstm_df) != n_users * 4:
+        raise ValueError(
+            f"Expected {n_users * 4} rows (4 weeks x {n_users} users), got {len(lstm_df)}"
+        )
+
     X = lstm_df[lstm_feature_cols].values.reshape(n_users, 4, n_features)
     y = labels.set_index("user_id").loc[user_ids, "churn"].values
 
