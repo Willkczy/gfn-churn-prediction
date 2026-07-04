@@ -54,7 +54,8 @@ Data generation supports two scales — `small` (50K users) for fast development
 | Experiment Tracking | MLflow | Planned (Phase 5) |
 | Containerization | Docker | ✅ Spark dev environment |
 | Model Serving | AWS SageMaker | Planned (Phase 6) |
-| CI/CD | GitHub Actions | Planned |
+| Testing | pytest, ruff | ✅ Implemented |
+| CI/CD | GitHub Actions | ✅ Lint + unit tests on push/PR |
 | Infrastructure | Terraform | Planned (Phase 6) |
 | Monitoring | Evidently AI, AWS CloudWatch | Planned (Phase 7) |
 
@@ -75,6 +76,8 @@ gfn-churn-prediction/
 ├── models/                    # Trained model artifacts + metrics (gitignored)
 ├── notebooks/                 # Phase-by-phase EDA, development, and validation notebooks
 ├── configs/                   # Canonical docs: data design, feature spec, temporal conventions
+├── tests/                     # Unit tests (pytest) + data-invariant checks (marked `data`)
+├── .github/workflows/         # CI: ruff lint + unit tests on push/PR
 ├── infrastructure/
 │   └── docker/                # Spark dev cluster (terraform/ planned for Phase 6)
 ├── PROJECT_PLAN.md            # Phases, progress checklist, decision log
@@ -83,7 +86,7 @@ gfn-churn-prediction/
 └── pyproject.toml             # Dependencies (managed with uv)
 ```
 
-Planned but not yet present: `tests/`, `.github/workflows/`, `infrastructure/terraform/` (see [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)).
+Planned but not yet present: `infrastructure/terraform/` (see [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)).
 
 ## Getting Started
 
@@ -136,6 +139,14 @@ uv run python -m src.data_generation.generate_users
 uv run python -m src.data_generation.generate_session_logs
 uv run python -m src.data_generation.generate_subscription_events
 uv run python -m src.data_generation.generate_payments
+```
+
+### Tests & Lint
+
+```bash
+uv run ruff check src/ tests/     # lint
+uv run pytest                     # full suite (data-invariant tests skip if data/processed/ is absent)
+uv run pytest -m "not data"       # unit tests only (what CI runs)
 ```
 
 ## Roadmap
