@@ -81,7 +81,7 @@
   - [x] XGBoost EDA + training pipeline (notebook, section 1–2)
   - [x] XGBoost v1 baseline trained — test AUC 0.969, PR-AUC 0.709 (models/xgboost_v1_*)
   - [x] Investigate churn-rate gap (M1) — root cause: unguarded session-count noise (`generate_session_logs.py:185`) lets ~25% of about_to_churn users escape the label via ghost sessions; fix folded into M4
-  - [ ] Tests + CI safety net before data regen (M2)
+  - [x] Tests + CI safety net before data regen (M2)
   - [ ] Harden data generation v2 + regen + retrain XGBoost v2 (M4; target AUC band 0.85–0.93)
   - [ ] SHAP feature importance on v2 (M5)
   - [ ] LSTM model (M6)
@@ -133,6 +133,7 @@
 | 2026-07-05 | MLflow (Phase 5) pulled forward to before LSTM work; local file store | Metrics were unversioned (`/models/` gitignored). Tracking must exist before the v1→v2 regen comparison and LSTM sweeps. |
 | 2026-07-05 | Docs/structure cleanup: README synced to actual state (roadmap ticks, stack status column, real tree), CLAUDE.md status refreshed, pyproject description filled, deleted orphan pre-split intermediates (`lstm_features.npz`, `xgboost_features.parquet`) | README advertised unbuilt components (tests/, workflows, terraform) and unchecked completed phases; orphans were referenced by no code. |
 | 2026-07-05 | M1 complete — churn-gap root cause is the unguarded count jitter at `generate_session_logs.py:185` (`max(0, int(rng.normal(weekly_count, 1)))`): fully-decayed weeks have ~15.9% odds of a ghost session, so 24.75% of about_to_churn users escape the churn label. Fix folded into M4, designed jointly with the partial-churner mechanic (CP1 decision). | Fixing the bug alone would raise churn to ~15.9% but make the data easier (escapees are the current hard cases). One regen cycle: bug guard + deliberate hardening land together. Findings independently verified against raw parquet. |
+| 2026-07-05 | M2 complete — added pytest suite (24 tests: labels, split, aggregation/reshape, evaluate, data-invariants), a row-count guard in `reshape_lstm`, ruff config + mechanical cleanup, and a GitHub Actions CI workflow (ruff + `pytest -m "not data"` on push/PR to develop/feature/**/chore/**) | Zero tests existed despite two prior silent-failure bugs (0-indexed decay bug, unanchored .gitignore rule). Safety net needed before the M4 regen so the hardening effect is verifiable, not just asserted. |
 
 ---
 
