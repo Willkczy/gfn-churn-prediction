@@ -10,8 +10,8 @@
 
 **Key Targets**:
 - Dual-model: XGBoost (interpretability) + LSTM (sequential patterns)
-- Ensemble AUC ≥ 0.89
-- 50+ engineered features from 3.55M+ session logs
+- Pre-registered ensemble success criterion: at precision ≥ 0.75 on test (threshold frozen on val), ensemble recall ≥ XGBoost recall + 2pp. (Replaced the original "AUC ≥ 0.89" target on 2026-07-05 — XGBoost alone hit 0.969 test AUC, so raw AUC no longer discriminates; see decision log.)
+- 42 engineered features (flat) / 38 weekly features (sequential) from 3.55M+ session logs
 - SHAP-based feature importance for retention insights
 - Full MLOps: CI/CD, monitoring, drift detection, auto-retraining
 
@@ -58,16 +58,17 @@
   - [x] `generate_payments.py` — 238.9K payments, 3 types (subscription/day_pass/in_app), churn users: 10% failed + 8% refund rate
   - [x] `run_all.py` — unified entry point, supports SCALE and SEED env vars
   - [ ] Data validation & EDA notebook (optional, can do in Phase 2)
-- [ ] Phase 2: Feature engineering (PySpark)
+- [x] Phase 2: Feature engineering (PySpark) ✅ (PR #1 → develop)
   - [x] Dev environment setup: Docker Compose Spark cluster integrated into project (.devcontainer + infrastructure/docker)
   - [x] Session pattern features (weekly_session_count, avg_session_duration, total_playtime, session_regularity, peak_hour_ratio, weekend_ratio)
   - [x] Engagement decay features (session_count_wow_change, playtime_wow_change, longest_inactive_days, baseline ratios, rolling slope)
   - [x] Streaming quality features (avg_latency, avg_fps, frame_drop_rate, disconnect_rate, avg_bitrate, avg_jitter, packet_loss_avg, crash_exit_ratio)
-  - [ ] Game diversity features (unique_games_played, genre_entropy, new_game_trial_rate, top_game_concentration)
-  - [ ] Playtime volatility features (daily_playtime_std, daily_playtime_cv, session_duration_std)
-  - [ ] Payment & subscription features (aggregated over 4-week)
-  - [ ] Combine all features → XGBoost format (flat) + LSTM format (sequential)
-  - [ ] Extract finalized code into src/feature_engineering/*.py modules
+  - [x] Game diversity features (unique_games_played, genre_entropy, new_game_trial_rate, top_game_concentration)
+  - [x] Playtime volatility features (daily_playtime_std, daily_playtime_cv, session_duration_std)
+  - [x] Payment & subscription features (aggregated over 4-week)
+  - [x] Population normalization (weekly_session_count_norm, total_playtime_min_norm) — removes hot-week effects
+  - [x] Combine all features → XGBoost format (flat) + LSTM format (sequential)
+  - [x] Extract finalized code into src/feature_engineering/*.py modules
 - [x] Phase 3: Dataset construction
   - [x] Churn labels (zero sessions in pred window → churn=1)
   - [x] XGBoost flat aggregation (50K × 43 cols)
@@ -75,8 +76,17 @@
   - [x] Stratified train/val/test split (70/15/15, seed=42)
   - [x] Phase 3 validation notebook (14 checks across structure / label / feature)
   - [x] Extract notebook to src/dataset/*.py modules (output byte-identical to notebook)
-- [ ] Phase 4: Model training
-- [ ] Phase 5: Experiment tracking
+- [ ] Phase 4: Model training (in progress on `feature/phase4-model-training`; sequencing per IMPLEMENTATION_PLAN.md)
+  - [x] Model config, data loaders, shared evaluator (src/models/)
+  - [x] XGBoost EDA + training pipeline (notebook, section 1–2)
+  - [x] XGBoost v1 baseline trained — test AUC 0.969, PR-AUC 0.709 (models/xgboost_v1_*)
+  - [x] Investigate churn-rate gap (M1) — root cause: unguarded session-count noise (`generate_session_logs.py:185`) lets ~25% of about_to_churn users escape the label via ghost sessions; fix folded into M4
+  - [x] Tests + CI safety net before data regen (M2)
+  - [ ] Harden data generation v2 + regen + retrain XGBoost v2 (M4; target AUC band 0.85–0.93)
+  - [ ] SHAP feature importance on v2 (M5)
+  - [ ] LSTM model (M6)
+  - [ ] Ensemble — success: recall@precision≥0.75 beats XGBoost by ≥2pp (M7)
+- [ ] Phase 5: Experiment tracking (MLflow — pulled forward to before LSTM work, M3)
 - [ ] Phase 6: AWS deployment
 - [ ] Phase 7: MLOps
 
@@ -89,8 +99,8 @@
 | subscription_events | 38,763 | 0.5 MB |
 | payments | 238,948 | 2.3 MB |
 
-**Current branch**: `feature/phase2-feature-engineering` (from `develop`)
-**Next Step**: Phase 2 — Implement remaining feature sections (Game Diversity, Playtime Volatility, Subscription & Payment).
+**Current branch**: `feature/phase4-model-training` (from `develop`)
+**Next Step**: IMPLEMENTATION_PLAN.md M1 — investigate the churn-rate gap (12.2% actual vs 15–18% designed), read-only, findings to user before any code changes.
 
 ---
 
@@ -116,7 +126,15 @@
 | 2025-03-19 | Shifted observation window to week 5–8, prediction to week 9–10 | Original week 1–4 obs window preceded the churn decay onset (week 8), making churn labels ineffective. New placement captures early decay signals in obs and meaningful churn in prediction window. Week 1–4 retained as historical baseline for trend features. |
 | 2025-03-19 | Split PROJECT_PLAN into lean plan + CLAUDE.md + configs/feature_spec.md | Original 596-line plan was too large. Data schemas/generation logic now live in code. Feature spec is a working checklist in configs/. CLAUDE.md provides AI-agent context. |
 | 2026-05-20 | Fixed off-by-one in `generate_session_logs.py` decay logic; introduced explicit `calendar_week = week + 1`; created `configs/temporal_conventions.md` as the canonical timeline doc | Loop counter `week` was 0-indexed but the formula was written assuming 1-indexed, so decay-zero landed on calendar week 10 instead of the intended week 9. Result: Phase 3 churn rate was 3.5% instead of the expected ~15%. Fix: branch on `calendar_week`. All docs now consistently use 1-indexed calendar weeks. Requires Phase 1 data regen + Phase 2 rerun. |
+| 2026-06-07 | Anchored `.gitignore` `models/` rule to `/models/` | Unanchored rule also matched `src/models/`, silently ignoring Phase 4 source (config, data_loaders, evaluate, xgboost_model). Commit 2b79a29 had landed empty as a result. Source now tracked. |
+| 2026-07-05 | Full repo audit → `DEVELOPMENT_PLAN.md` (roadmap) + `IMPLEMENTATION_PLAN.md` (11 milestones, 5 user checkpoints) | Evidence-based planning before continuing Phase 4. Key findings: zero tests despite two past silent-failure bugs; churn rate 12.2% vs designed 15–18%; XGBoost v1 at 0.969 test AUC saturates the old target. |
+| 2026-07-05 | Harden synthetic data (v2): randomized decay onset, partial churners, persona overlap, softer quality shift — one regen cycle combined with the churn-gap fix | XGBoost v1 alone hit 0.969 test AUC, leaving no headroom for the LSTM/ensemble story. Target band for retrained baseline: AUC 0.85–0.93, churn rate 13–18%. |
+| 2026-07-05 | Replaced "ensemble AUC ≥ 0.89" with pre-registered criterion: recall at precision ≥ 0.75 (val-frozen threshold) must beat XGBoost by ≥ 2pp | Raw AUC no longer discriminates between models on this data; recall-at-precision reflects the retention use case (how many churners caught at acceptable alert quality). Criterion fixed before LSTM training to avoid post-hoc metric shopping. |
+| 2026-07-05 | MLflow (Phase 5) pulled forward to before LSTM work; local file store | Metrics were unversioned (`/models/` gitignored). Tracking must exist before the v1→v2 regen comparison and LSTM sweeps. |
+| 2026-07-05 | Docs/structure cleanup: README synced to actual state (roadmap ticks, stack status column, real tree), CLAUDE.md status refreshed, pyproject description filled, deleted orphan pre-split intermediates (`lstm_features.npz`, `xgboost_features.parquet`) | README advertised unbuilt components (tests/, workflows, terraform) and unchecked completed phases; orphans were referenced by no code. |
+| 2026-07-05 | M1 complete — churn-gap root cause is the unguarded count jitter at `generate_session_logs.py:185` (`max(0, int(rng.normal(weekly_count, 1)))`): fully-decayed weeks have ~15.9% odds of a ghost session, so 24.75% of about_to_churn users escape the churn label. Fix folded into M4, designed jointly with the partial-churner mechanic (CP1 decision). | Fixing the bug alone would raise churn to ~15.9% but make the data easier (escapees are the current hard cases). One regen cycle: bug guard + deliberate hardening land together. Findings independently verified against raw parquet. |
+| 2026-07-05 | M2 complete — added pytest suite (24 tests: labels, split, aggregation/reshape, evaluate, data-invariants), a row-count guard in `reshape_lstm`, ruff config + mechanical cleanup, and a GitHub Actions CI workflow (ruff + `pytest -m "not data"` on push/PR to develop/feature/**/chore/**) | Zero tests existed despite two prior silent-failure bugs (0-indexed decay bug, unanchored .gitignore rule). Safety net needed before the M4 regen so the hardening effect is verifiable, not just asserted. |
 
 ---
 
-*Last updated: 2025-03-22*
+*Last updated: 2026-07-05*

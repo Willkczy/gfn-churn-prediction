@@ -16,6 +16,11 @@ data/splits/*.parquet
 data/raw/*.csv
 data/processed/*.csv
 data/splits/*.csv
+data/processed/*.npz
+
+# Trained models (large binaries, regenerable)
+# Anchored to repo root so it does NOT match src/models/ source code.
+/models/
 
 # Notebooks checkpoints
 .ipynb_checkpoints/
@@ -27,6 +32,7 @@ mlflow/artifacts/
 # IDE
 .vscode/
 .idea/
+.claude/
 
 # OS
 .DS_Store
@@ -47,3 +53,6 @@ infrastructure/terraform/*.tfstate*
 spark_cluster_data/
 pg_db_data/
 pgadmin_data/
+
+# Scratch (throwaway analysis, M1 investigation etc.)
+scratch/

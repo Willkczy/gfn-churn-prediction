@@ -1,6 +1,7 @@
+import datetime
+
 import numpy as np
 import pandas as pd
-import datetime
 
 # --- Scale config ---
 SCALE = {
@@ -99,7 +100,6 @@ def generate_users(scale: str = "small", seed: int = 42) -> pd.DataFrame:
     personas = rng.choice(PERSONAS, size=num_users, p=PERSONA_WEIGHTS).tolist()
 
     # Signup date: spread over 2023-01-01 ~ 2023-12-31
-    signup_start = pd.Timestamp("2023-01-01")
     signup_dates = _generate_signup_dates(num_users, rng)
 
     # Subscription tier: depends on persona
@@ -146,11 +146,11 @@ if __name__ == "__main__":
     df.to_parquet(output_path, index=False)
 
     print(f"Generated {len(df)} users (scale={scale}) → {output_path}")
-    print(f"\nPersona distribution:")
+    print("\nPersona distribution:")
     print(df["persona"].value_counts())
-    print(f"\nSubscription tier distribution:")
+    print("\nSubscription tier distribution:")
     print(df["subscription_tier"].value_counts())
-    print(f"\nTier by persona:")
+    print("\nTier by persona:")
     print(pd.crosstab(df["persona"], df["subscription_tier"], normalize="index").round(3))
-    print(f"\nRegion top 10:")
+    print("\nRegion top 10:")
     print(df["region"].value_counts().head(10))

@@ -60,9 +60,9 @@ if __name__ == "__main__":
 
     # Quick validation
     print(f"Generated {len(df)} games → {output_path}")
-    print(f"\nPopularity distribution:")
+    print("\nPopularity distribution:")
     print(df["popularity_tier"].value_counts().sort_index())
-    print(f"\nGenre distribution:")
+    print("\nGenre distribution:")
     print(df["genre"].value_counts())
-    print(f"\nSample rows:")
+    print("\nSample rows:")
     print(df.head(10).to_string(index=False))

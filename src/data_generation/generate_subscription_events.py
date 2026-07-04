@@ -146,10 +146,10 @@ if __name__ == "__main__":
     df.to_parquet(output_path, index=False)
 
     print(f"\nGenerated {len(df):,} events → {output_path}")
-    print(f"\nEvent type distribution:")
+    print("\nEvent type distribution:")
     print(df["event_type"].value_counts())
-    print(f"\nEvents per persona:")
+    print("\nEvents per persona:")
     merged = df.merge(users_df[["user_id", "persona"]], on="user_id")
     print(pd.crosstab(merged["persona"], merged["event_type"]))
-    print(f"\nSample rows:")
+    print("\nSample rows:")
     print(df.head(10).to_string(index=False))

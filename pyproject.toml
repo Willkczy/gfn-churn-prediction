@@ -1,13 +1,37 @@
 [project]
 name = "gfn-churn-prediction"
 version = "0.1.0"
-description = "Add your description here"
+description = "End-to-end churn prediction pipeline on synthetic cloud-gaming data — PySpark feature engineering, XGBoost + LSTM dual-model, AWS MLOps"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "faker>=40.8.0",
     "ipykernel>=7.2.0",
+    "matplotlib>=3.10.9",
     "numpy>=2.4.3",
     "pandas>=3.0.1",
     "pyarrow>=23.0.1",
+    "scikit-learn>=1.8.0",
+    "seaborn>=0.13.2",
+    "shap>=0.51.0",
+    "torch>=2.12.0",
+    "xgboost>=3.2.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.15.20",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "data: tests that read generated artifacts under data/processed/ (skipped if absent)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = ["I"]

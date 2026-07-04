@@ -1,14 +1,14 @@
 import os
 import time
-import pandas as pd
+
 import pyarrow as pa
 import pyarrow.parquet as pq
 
 from src.data_generation.generate_game_catalog import generate_game_catalog
-from src.data_generation.generate_users import generate_users
+from src.data_generation.generate_payments import generate_payments
 from src.data_generation.generate_session_logs import generate_session_logs
 from src.data_generation.generate_subscription_events import generate_subscription_events
-from src.data_generation.generate_payments import generate_payments
+from src.data_generation.generate_users import generate_users
 
 
 def main():

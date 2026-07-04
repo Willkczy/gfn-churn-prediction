@@ -4,9 +4,10 @@
 GFN Churn Prediction — end-to-end ML pipeline predicting user churn on a cloud gaming platform (modeled after NVIDIA GeForce NOW). Uses synthetic data, PySpark feature engineering, XGBoost + LSTM dual-model, full MLOps on AWS.
 
 ## Current Status
-- **Phase 1** (data generation): Complete, merged, tagged v0.1.0-phase1
-- **Phase 2** (feature engineering): In progress on `feature/phase2-feature-engineering`
-- Working in `notebooks/phase2_feature_engineering.ipynb` first, then extracting to `src/feature_engineering/`
+- **Phases 1–3** complete and merged to `develop`: data generation (v0.1.0-phase1), PySpark feature engineering (PR #1), dataset construction (PR #2)
+- **Phase 4** (model training): in progress on `feature/phase4-model-training` — XGBoost v1 trained (test AUC 0.969); SHAP, LSTM, ensemble pending
+- Execution follows `IMPLEMENTATION_PLAN.md` (milestones M1–M11 with user checkpoints); background in `DEVELOPMENT_PLAN.md`
+- Known issue: churn rate is 12.2% but the design predicts 15–18% — investigate (IMPLEMENTATION_PLAN M1) before further model work
 
 ## Temporal Design
 - 12-week data window: 2024-01-01 ~ 2024-03-25 (week numbers everywhere are **1-indexed calendar weeks** — see [configs/temporal_conventions.md](configs/temporal_conventions.md) for the canonical timeline)
@@ -17,12 +18,16 @@ GFN Churn Prediction — end-to-end ML pipeline predicting user churn on a cloud
 
 ## Key Files
 - `PROJECT_PLAN.md` — phases, progress checklist, architecture decisions
+- `IMPLEMENTATION_PLAN.md` — milestone-by-milestone execution plan (follow this when implementing)
 - `configs/data_design.md` — **how data was generated**: personas, decay mechanics, causal relationships, noise. Read before modeling.
-- `configs/feature_spec.md` — feature definitions with checkboxes (Phase 2 working reference)
-- `notebooks/phase2_feature_engineering.ipynb` — active development notebook (PySpark)
-- `notebooks/phase2_feature_engineering_pandas.ipynb` — pandas equivalent for learning/reference
-- `src/data_generation/` — completed Phase 1 generators (50K users, 3.55M sessions)
-- `data/raw/` — generated parquet files (users, session_logs, game_catalog, subscription_events, payments)
+- `configs/feature_spec.md` — feature definitions and output-format spec
+- `notebooks/phase4_xgboost.ipynb` — active development notebook (EDA + XGBoost training)
+- `notebooks/phase2_feature_engineering_pandas.ipynb` — pandas equivalent of the Spark pipeline, for learning/reference
+- `src/data_generation/` — Phase 1 generators (50K users, 3.55M sessions)
+- `src/feature_engineering/` — Phase 2 PySpark pipeline (runs in the Spark dev container)
+- `src/dataset/` — Phase 3 labels, split, XGBoost/LSTM formatting
+- `src/models/` — Phase 4 config, loaders, evaluator, XGBoost; LSTM/ensemble to come
+- `data/raw/`, `data/processed/`, `models/` — generated artifacts (gitignored, regenerable)
 
 ## Conventions
 - **Commits**: conventional commits — `feat/fix/docs/chore/data(scope): message`
