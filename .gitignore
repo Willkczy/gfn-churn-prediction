@@ -53,3 +53,6 @@ infrastructure/terraform/*.tfstate*
 spark_cluster_data/
 pg_db_data/
 pgadmin_data/
+
+# Scratch (throwaway analysis, M1 investigation etc.)
+scratch/
